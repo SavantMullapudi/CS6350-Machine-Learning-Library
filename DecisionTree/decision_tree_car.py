@@ -197,7 +197,7 @@ results = {'information_gain (IG)': [], 'majority_error (ME)': [], 'gini_index (
 
 
 
-for max_depth in range(1, 3):  # Modify the range to vary the depth of the tree
+for max_depth in range(1, 7):  # Modify the range to vary the depth of the tree
 
     for criterion in ['information_gain (IG)', 'majority_error (ME)', 'gini_index (GI)']:
         model = DecisionTreeClassifier(max_depth=max_depth)
