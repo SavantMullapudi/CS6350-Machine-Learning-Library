@@ -4,13 +4,16 @@ from sklearn.metrics import accuracy_score
 from collections import Counter
 
 col_names = ['buying', 'maint', 'doors', 'persons', 'lug_boot', 'safety', 'label']
-train_df = pd.read_csv("train.csv", names=col_names)
-X_train = train_df.drop('label', axis=1).values
-y_train = train_df['label'].values
 
-test_df = pd.read_csv("test.csv", names=col_names)
-X_test = test_df.drop('label', axis=1).values
-y_test = test_df['label'].values
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(
+    pd.read_csv("train.csv", names=col_names).drop('label', axis=1).values,
+    pd.read_csv("train.csv", names=col_names)['label'].values,
+    test_size=0.2,  
+    random_state=42  
+)
+
 
 class DecisionTree:
     def __init__(self, attr_index, attr_Name, is_leaf, label, depth, info_gain, entropy, parent_val):
@@ -36,22 +39,27 @@ class DecisionTree:
         else:
             return self.label
 
+
     def majority_error(self, X, y, attr_index):
         val = np.unique(X[:, attr_index])
         err_sum = 0.0
         
         for i in val:
-            indices = np.where(X[:, attr_index] == val)[0]
-            if len(ind) == 0:
+            mask = (X[:, attr_index] == i)
+            indices = np.arange(len(y))[mask] 
+            
+            if len(indices) == 0:
                 continue
 
-            class_counts = Counter(y[ind])
-            most_common_count = class_counts.most_common(1)[0][1]  
-            me_value = 1 - (most_common_count / len(ind)) 
+            class_counts = Counter(y[indices])
+            most_common_count = class_counts.most_common(1)[0][1]
+            me_value = 1 - (most_common_count / len(indices))
 
-            err_sum = err_sum + (len(ind) / len(y)) * me_value
-            
+            err_sum += (len(indices) / len(y)) * me_value
+
         return err_sum
+
+
 
     def gini_index(self, X, y, attr_index):
         values = set(X[attr_index])
@@ -165,7 +173,7 @@ class DecisionTreeClassifier:
         for count in counts:
             prob = count / total
             if prob != 0:
-                entropy_value -= prob * np.log2(prob)
+                entropy_value = entropy_value - prob * np.log2(prob)
         return entropy_value
 
     def calculate_information_gain(self, X, y, attr_index):
@@ -198,7 +206,7 @@ results = {'information_gain (IG)': [], 'majority_error (ME)': [], 'gini_index (
 
 
 for max_depth in range(1, 7):  # Modify the range to vary the depth of the tree
-
+    
     for criterion in ['information_gain (IG)', 'majority_error (ME)', 'gini_index (GI)']:
         model = DecisionTreeClassifier(max_depth=max_depth)
         model.fit(X_train, y_train)
