@@ -1,228 +1,156 @@
-import numpy as np
 import pandas as pd
-from sklearn.metrics import accuracy_score
+import numpy as np
 from collections import Counter
-
-col_names = ['buying', 'maint', 'doors', 'persons', 'lug_boot', 'safety', 'label']
-
-from sklearn.model_selection import train_test_split
-
-X_train, X_test, y_train, y_test = train_test_split(
-    pd.read_csv("train.csv", names=col_names).drop('label', axis=1).values,
-    pd.read_csv("train.csv", names=col_names)['label'].values,
-    test_size=0.2,  
-    random_state=42  
-)
+from math import log2
+from random import choice
 
 
-class DecisionTree:
-    def __init__(self, attr_index, attr_Name, is_leaf, label, depth, info_gain, entropy, parent_val):
-        self.attr_index = attr_index
-        self.attr_Name = attr_Name
-        self.children = {}
-        self.is_leaf = is_leaf
-        self.label = label
-        self.depth = depth
-        self.info_gain = info_gain
-        self.entropy = entropy
-        self.parent_val = parent_val
+columns_car = [
+    ("buying", "categorical"),
+    ("maint", "categorical"),
+    ("doors", "categorical"),
+    ("persons", "categorical"),
+    ("lug_boot", "categorical"),
+    ("safety", "categorical"),
+    ("label", "categorical"),
+]
 
-    def add_child(self, child_node, attr_value):
-        self.children[attr_value] = child_node
+target_variable = "label"
 
-    def predict(self, row):
-        if self.is_leaf:
-            return self.label
-        current_val = row[self.attr_index]
-        if current_val in self.children:
-            return self.children[current_val].predict(row)
-        else:
-            return self.label
+def attr_name(columns):
+    return [attr_name for attr_name, _ in columns]
 
 
-    def majority_error(self, X, y, attr_index):
-        val = np.unique(X[:, attr_index])
-        err_sum = 0.0
-        
-        for i in val:
-            mask = (X[:, attr_index] == i)
-            indices = np.arange(len(y))[mask] 
-            
-            if len(indices) == 0:
-                continue
-
-            class_counts = Counter(y[indices])
-            most_common_count = class_counts.most_common(1)[0][1]
-            me_value = 1 - (most_common_count / len(indices))
-
-            err_sum += (len(indices) / len(y)) * me_value
-
-        return err_sum
+def attr_freq(labels):
+    return Counter(labels)
 
 
+def attr_prop(label_freq, num_rows):
+    return [label_freq[label] / num_rows for label in label_freq]
 
-    def gini_index(self, X, y, attr_index):
-        values = set(X[attr_index])
-        gini = 1
-        for value in values:
-            p = (X[attr_index] == value).mean()
-            gini = gini - (p**2)
-        return gini
 
-    def display_node(self, indent=""):
-        details = [
-            f"{indent}Depth: {self.depth}",
-            f"{indent}Attribute Name: {self.attr_Name}",
-            f"{indent}Information Gain: {self.info_gain}",
-            f"{indent}Entropy: {self.entropy}",
-            f"{indent}Parent's Value: {self.parent_val}",
-            f"{indent}Predicted Label: {self.label}"
-        ]
-        for val in details:
-            print(val)
-        for child in self.children.values():
-            child.display_node(indent + "  ")
+def majority_error(data, num_rows, target_variable):
+    label_freq = attr_freq(data[target_variable])
+    label_prop = attr_prop(label_freq, num_rows)
+    majority_error =  1 - max(label_prop)
+    return majority_error
 
-class DecisionTreeClassifier:
-    def __init__(self, max_depth=np.inf):
-        self.root = None
-        self.tree_depth = 0
-        self.max_depth = max_depth
-        self.max_path_length = 0
 
-    def build_tree(self, X, y, features, available_features=None, current_depth=0,
-                   parent_info={"best_gain": None, "best_feature": None, "parent_value": None}):
-        if available_features is None:
-            available_features = list(range(len(features)))
-        if current_depth > self.max_path_length:
-            self.max_path_length = current_depth
-        if (current_depth >= self.max_depth) or (len(available_features) == 0) or (len(np.unique(y)) == 1):
-            classes, counts = np.unique(y, return_counts=True)
-            majority_class = classes[np.argmax(counts)]
-            return DecisionTree(
-                attr_index=None, 
-                attr_Name=None, 
-                is_leaf=True, 
-                label=majority_class, 
-                depth=current_depth,
-                info_gain=parent_info["best_gain"],
-                entropy=parent_info["best_feature"],
-                parent_val=parent_info["parent_value"]
+def gini_index(data, num_rows, target_variable):
+    label_freq = attr_freq(data[target_variable])
+    label_prop = attr_prop(label_freq, num_rows)
+    gini_index = 1 - sum([p**2 for p in label_prop])
+    return gini_index
+
+
+def entropy(data, num_rows, target_variable):
+    label_freq = attr_freq(data[target_variable])
+    label_prop = attr_prop(label_freq, num_rows)
+    entropy = -sum([p*log2(p) if p > 0 else 0 for p in label_prop])
+    return entropy
+
+
+def data_by_attr_val(data, attr, val):
+    filtered_data = data[data[attr] == val]
+    return [filtered_data, len(filtered_data)]
+
+
+def information_gain(total_method_value, attr_prop, method_values):
+    weighted_sum = sum([attr_prop[i] * method_values[i] for i in range(len(method_values))])
+    information_gain = total_method_value - weighted_sum
+    return information_gain
+
+
+def max_gain_node(data, total_method_value, target_variable, method_function):
+    information_gain_by_attr = {}
+
+    for attr in data.columns:
+        if attr != target_variable:
+            attr_frequency = attr_freq(data[attr])
+            attr_proportions = attr_prop(attr_frequency, len(data))
+
+            method_values = [
+                method_function(
+                    *data_by_attr_val(data, attr, value),
+                    target_variable
+                )
+                for value in attr_frequency
+            ]
+
+            information_gain_by_attr[attr] = information_gain(
+                total_method_value, attr_proportions, method_values
             )
-        best_gain = -1
-        best_feature_index = None
-        best_entropy = None
-        for i, attr_index in enumerate(available_features):
-            info_gain, feature_entropy = self.calculate_information_gain(X, y, attr_index)
-            if info_gain > best_gain:
-                best_gain = info_gain
-                best_feature_index = attr_index
-                best_entropy = feature_entropy
-        classes, counts = np.unique(y, return_counts=True)
-        majority_class = classes[np.argmax(counts)]
-        node = DecisionTree(
-            attr_index=best_feature_index, 
-            attr_Name=features[best_feature_index], 
-            is_leaf=False, 
-            label=majority_class, 
-            depth=current_depth,
-            info_gain=best_gain,
-            entropy=parent_info["best_feature"],
-            parent_val=parent_info["parent_value"]
-        )
-        feature_values = np.unique(X[:, best_feature_index])
-        remaining_features = np.delete(available_features, i)
-        for value in feature_values:
-            subset_indices = np.where(X[:, best_feature_index] == value)[0]
-            if len(subset_indices) == 0:
-                node.add_child(
-                    DecisionTree(
-                        attr_index=None, 
-                        attr_Name=None, 
-                        is_leaf=True, 
-                        label=majority_class, 
-                        depth=current_depth + 1,
-                        info_gain=best_gain,
-                        entropy=best_entropy,
-                        parent_val=value
-                    ), 
-                    value
-                )
-            else:
-                child_info = {
-                    "best_gain": best_gain,
-                    "best_feature": best_entropy,
-                    "parent_value": value
-                }
-                node.add_child(
-                    self.build_tree(
-                        X[subset_indices], 
-                        y[subset_indices], 
-                        features, 
-                        remaining_features, 
-                        current_depth + 1, 
-                        child_info
-                    ), 
-                    value
-                )
-        return node
 
-    def calculate_entropy(self, counts):
-        total = sum(counts)
-        entropy_value = 0
-        for count in counts:
-            prob = count / total
-            if prob != 0:
-                entropy_value = entropy_value - prob * np.log2(prob)
-        return entropy_value
-
-    def calculate_information_gain(self, X, y, attr_index):
-        total_entropy = self.calculate_entropy(np.unique(y, return_counts=True)[1])
-        weighted_entropy = 0
-        feature_values = np.unique(X[:, attr_index])
-        for value in feature_values:
-            subset_indices = np.where(X[:, attr_index] == value)[0]
-            _, subset_counts = np.unique(y[subset_indices], return_counts=True)
-            weighted_entropy += (len(subset_indices) / len(y)) * self.calculate_entropy(subset_counts)
-        info_gain = total_entropy - weighted_entropy
-        return info_gain, total_entropy
-
-    def fit(self, X, y):
-        features = list(range(X.shape[1]))
-        self.root = self.build_tree(X, y, features)
-
-    def predict(self, X):
-        return [self.root.predict(row) for row in X]
-
-    def get_longest_path_length(self):
-        return self.max_path_length
-
-    def display_tree(self):
-        if self.root:
-            self.root.display_node()
-
-results = {'information_gain (IG)': [], 'majority_error (ME)': [], 'gini_index (GI)': []}
+    if information_gain_by_attr:
+        return max(information_gain_by_attr, key=information_gain_by_attr.get)
 
 
+def decision_tree(data, target_variable, method, maximum_depth, depth=0):
+    method_value = method(data, len(data), target_variable)
+    node = max_gain_node(data, method_value, target_variable, method)
 
-for max_depth in range(1, 7):  # Modify the range to vary the depth of the tree
+    tree = {node: {}}
+    unique_values = np.unique(data[node])
+
+    for i in unique_values:
+        subset = data[data[node] == i]
+        target_values = subset[target_variable].unique()
+
+        if len(target_values) == 1:
+            tree[node][i] = target_values[0]
+        elif depth + 1 < maximum_depth:
+            tree[node][i] = decision_tree(subset, target_variable, method, maximum_depth, depth + 1)
+
+    return tree
+
+
+def predict(tree, instance):
+    if not isinstance(tree, dict):
+        return tree
+
+    root_node = next(iter(tree))
+    feature_value = instance[root_node]
+
+    if feature_value in tree[root_node]:
+        return predict(tree[root_node][feature_value], instance)
+    return None
+
+
+def cal_error(tree, data, target_variable):
+    correct = sum(1 for _, row in data.iterrows() if predict(tree, row) == row[target_variable])
+    err = 1 - correct / len(data)
+    return err
+
+
+def car_decision_tree():
+    train_df = pd.read_csv("DecisionTree/data/car/train.csv")
+    train_df.columns = attr_name(columns_car)
+    test_df = pd.read_csv("DecisionTree/data/car/test.csv")
+    test_df.columns = attr_name(columns_car)
+
+   
+    method_mapping = {
+        "majority_error": majority_error,
+        "gini_index": gini_index,
+        "entropy": entropy,
+    }
+
     
-    for criterion in ['information_gain (IG)', 'majority_error (ME)', 'gini_index (GI)']:
-        model = DecisionTreeClassifier(max_depth=max_depth)
-        model.fit(X_train, y_train)
-        y_train_pred = model.predict(X_train)
-        y_test_pred = model.predict(X_test)
+    for method_name, method_func in method_mapping.items():
+        print(f"\nMethod: {method_name}")
 
-        train_acc = accuracy_score(y_train, y_train_pred)
-        test_acc = accuracy_score(y_test, y_test_pred)
+        # Modify the range to increase of decrease the depth of the tree
+        for depth in range(1, 7):
+            tree = decision_tree(train_df, target_variable, method_func, depth)
 
-        if criterion not in results:
-            results[criterion] = [] 
+            train_error = cal_error(tree, train_df, target_variable)
+            test_error = cal_error(tree, test_df, target_variable)
 
-        results[criterion].append((1 - train_acc, 1 - test_acc))
+            print(f"Depth: {depth}, Train Error: {train_error:.3f}, Test Error: {test_error:.3f}")
 
-print('Method  \t\tDepth \tTrain Error    \tTest Error')
-for criterion, errors in results.items():
-    for depth, (train_error, test_error) in enumerate(errors, start=1):
-        print(f'{criterion: <15} \tDepth {depth}: \t{train_error:.3f} \t{test_error:.3f}')
+
+
+if __name__ == "__main__":
+    car_decision_tree()
+
 
