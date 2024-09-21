@@ -274,8 +274,8 @@ def bank_decision_tree():
     are_unknowns_to_be_replaced = are_unknowns_to_be_replaced == "1"
 
 
-    train_df = "DecisionTree/data/bank/train.csv"
-    test_df = "DecisionTree/data/bank/test.csv"
+    train_df = "data/bank/train.csv"
+    test_df = "data/bank/test.csv"
     training_data = pd.read_csv(train_df)
     training_data.columns = attr_name(columns_bank_dataset)
     updated_training_data = categorical_data(
