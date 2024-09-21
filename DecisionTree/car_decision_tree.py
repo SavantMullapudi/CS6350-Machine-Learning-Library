@@ -123,9 +123,9 @@ def cal_error(tree, data, target_variable):
 
 
 def car_decision_tree():
-    train_df = pd.read_csv("DecisionTree/data/car/train.csv")
+    train_df = pd.read_csv("data/car/train.csv")
     train_df.columns = attr_name(columns_car)
-    test_df = pd.read_csv("DecisionTree/data/car/test.csv")
+    test_df = pd.read_csv("data/car/test.csv")
     test_df.columns = attr_name(columns_car)
 
    
