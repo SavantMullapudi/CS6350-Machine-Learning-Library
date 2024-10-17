@@ -3,8 +3,8 @@ import pandas as pd
 from sklearn.metrics import accuracy_score
 import matplotlib.pyplot as plt
 
-train_data = "DecisionTree/data/bank/train.csv"
-test_data = "DecisionTree/data/bank/test.csv"
+train_data = "data/bank/train.csv"
+test_data = "data/bank/test.csv"
 
 columns_bank_dataset = [
     ("age", "numeric"),
