@@ -45,8 +45,8 @@ def load_and_preprocess_data(file, columns_structure, target_variable):
 
     return X, y
 
-train_file = "DecisionTree/data/bank/train.csv"
-test_file = "DecisionTree/data/bank/test.csv"
+train_file = "data/bank/train.csv"
+test_file = "data/bank/test.csv"
 
 X_train, y_train = load_and_preprocess_data(train_file, columns_bank_dataset, target_variable)
 X_test, y_test = load_and_preprocess_data(test_file, columns_bank_dataset, target_variable)
@@ -210,7 +210,7 @@ class Bagged_tree:
             predictions += tree.predict(X)
         return np.sign(predictions)
 
-range_tree = range(1, 3)
+range_tree = range(1, 501)
 train_errors_bagging = []
 test_errors_bagging = []
 
