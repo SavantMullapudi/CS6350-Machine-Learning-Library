@@ -55,30 +55,31 @@ X_test, y_test = load_and_preprocess_data(test_file, columns_bank_dataset, targe
 
 
 class Node_Tree:
-    def __init__(self, attribute, attr_name, leaf_true, label, depth, info_gain, attr_ent_p, attr_val_p):
+    def __init__(self, attribute, attribute_name, is_leaf, value, depth, info_gain, split_attr, split_value):
         self.attribute = attribute
-        self.attr_name = attr_name
-        self.children = {}
-        self.leaf_true = leaf_true
-        self.label = label
+        self.attribute_name = attribute_name
+        self.is_leaf = is_leaf
+        self.value = value
         self.depth = depth
         self.info_gain = info_gain
-        self.attr_ent_p = attr_ent_p
-        self.attr_val_p = attr_val_p
+        self.split_attr = split_attr
+        self.split_value = split_value
+        self.children = {}
+
+    def add_child(self, child_node, value):
+        self.children[value] = child_node
+
+    def predict(self, x):
+        if self.is_leaf:
+            return self.value
+        value = x[self.attribute]
+        if value in self.children:
+            return self.children[value].predict(x)
+        else:
+            return self.value
 
     def get_attribute(self):
         return self.attribute
-
-    def add_child(self, child_node, attr_value):
-        self.children[attr_value] = child_node
-    
-    def predict(self, x):
-        if self.leaf_true:
-            return self.label
-        current_val = x[self.attribute]
-        if current_val not in self.children.keys():
-            return self.label
-        return self.children[current_val].predict(x)
 
 
 class Construct_tree:
