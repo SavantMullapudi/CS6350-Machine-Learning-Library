@@ -45,8 +45,8 @@ def load_and_preprocess_data(file, columns_structure, target_variable):
 
     return X, y
 
-train_file = "DecisionTree/data/bank/train.csv"
-test_file = "DecisionTree/data/bank/test.csv"
+train_file = "data/bank/train.csv"
+test_file = "data/bank/test.csv"
 
 X_train, y_train = load_and_preprocess_data(train_file, columns_bank_dataset, target_variable)
 X_test, y_test = load_and_preprocess_data(test_file, columns_bank_dataset, target_variable)
@@ -209,7 +209,7 @@ class RF_Classifier:
             predictions += dt_classifier.predict(X_subset)
         return np.sign(predictions)
 
-range_rf = range(1, 51)
+range_rf = range(1, 501)
 feat_range = [2, 4, 6]
 
 train_errors_rf = {2: [], 4: [], 6: []}
