@@ -266,8 +266,7 @@ while i_feat < len(feat_range):
 plt.xlabel('Number of Random Trees', fontsize=12)
 plt.ylabel('Error', fontsize=12)
 plt.title('Random Forest Training and Test Errors vs. Number of Trees', fontsize=14)
-plt.legend(loc='best')
-plt.xticks([0, 10, 20, 30, 40, 50], [0, 100, 200, 300, 400, 500]) 
+plt.legend(loc='best') 
 plt.ylim(0.000, 0.0225)  
 plt.yticks(np.arange(0.000, 0.225, 0.025)) 
 
