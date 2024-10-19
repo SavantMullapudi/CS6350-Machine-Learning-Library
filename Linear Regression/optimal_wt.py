@@ -2,8 +2,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-train_data = pd.read_csv('DecisionTree/data/concrete/train.csv')
-test_data = pd.read_csv('DecisionTree/data/concrete/test.csv')
+train_data = pd.read_csv('data/concrete/train.csv')
+test_data = pd.read_csv('data/concrete/test.csv')
 
 X_train = train_data.drop(columns=train_data.columns[-1]).values  
 y_train = train_data.iloc[:, -1].values  
