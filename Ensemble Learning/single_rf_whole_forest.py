@@ -3,7 +3,7 @@ import pandas as pd
 from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt
 
-# Data configuration
+
 columns_bank_dataset = [
     ("age", "numeric"),
     ("job", "categorical"),
@@ -25,7 +25,6 @@ columns_bank_dataset = [
 ]
 target_variable = "y"
 
-# Load and preprocess data
 def load_and_preprocess_data(file, columns_structure, target_variable):
     dtype_dict = {}
     column_headers = [col[0] for col in columns_structure]
@@ -44,13 +43,12 @@ def load_and_preprocess_data(file, columns_structure, target_variable):
 
     return X, y
 
-train_file = "DecisionTree/data/bank/train.csv"
-test_file = "DecisionTree/data/bank/test.csv"
+train_file = "data/bank/train.csv"
+test_file = "data/bank/test.csv"
 
 X_train, y_train = load_and_preprocess_data(train_file, columns_bank_dataset, target_variable)
 X_test, y_test = load_and_preprocess_data(test_file, columns_bank_dataset, target_variable)
 
-# Decision Tree Node
 class Node_Tree:
     def __init__(self, attribute, attribute_name, is_leaf, value, depth, info_gain, split_attr, split_value):
         self.attribute = attribute
@@ -158,7 +156,6 @@ class Construct_tree:
             predictions.append(self.root.predict(X[i]))
         return predictions
 
-# Bagged Tree Classifier
 class Bagged_tree:
     def __init__(self, num_trees):
         self.num_trees = num_trees
@@ -180,12 +177,12 @@ class Bagged_tree:
             predictions += tree.predict(X)
         return np.sign(predictions)
 
-# Random Forest Classifier
+
 class RF_Classifier:
     def __init__(self, tree_num, max_feat, max_depth=np.inf):
         self.tree_num = tree_num
         self.max_feat = max_feat
-        self.max_depth = max_depth  # Add this line to store max_depth
+        self.max_depth = max_depth  
         self.trees = []
 
     def fit(self, X, Y):
@@ -193,7 +190,7 @@ class RF_Classifier:
         for _ in range(self.tree_num):
             indices = np.random.choice(n_samples, n_samples, replace=True)
             features_indices = np.random.choice(n_features, self.max_feat, replace=False)
-            tree = Construct_tree(max_depth=self.max_depth)  # Use the stored max_depth
+            tree = Construct_tree(max_depth=self.max_depth)  
             tree.fit(X[indices][:, features_indices], Y[indices])
             self.trees.append((tree, features_indices))
 
@@ -203,7 +200,6 @@ class RF_Classifier:
             tree_preds.append(tree.predict(X[:, features_indices]))
         return np.sign(np.sum(tree_preds, axis=0))
 
-# Bias-Variance Calculation
 def bias_var(predictions, ground_truth):
     bias = np.mean(predictions) - ground_truth
     variance = np.var(predictions)
@@ -212,7 +208,7 @@ def bias_var(predictions, ground_truth):
 def squared_error(predictions, ground_truth):
     return np.mean((predictions - ground_truth) ** 2)
 
-def outcome_exp(X_train, y_train, X_test, y_test, num_iterations=100, num_btrees=5, num_rf_trees=5, max_feat=5):
+def outcome_exp(X_train, y_train, X_test, y_test, num_iterations=100, num_btrees=500, num_rf_trees=500, max_feat=5):
     single_tree_biases = []
     single_tree_variances = []
     bagged_tree_biases = []
@@ -228,7 +224,6 @@ def outcome_exp(X_train, y_train, X_test, y_test, num_iterations=100, num_btrees
         samp_ind = np.random.choice(n_samples, size=1000, replace=False)
         samp_X_train, samp_y_train = X_train[samp_ind], y_train[samp_ind]
 
-        # Single Random Tree
         single_tree = Construct_tree(max_depth=np.inf)
         single_tree.fit(samp_X_train, samp_y_train)
         single_tree_preds = single_tree.predict(X_test)
@@ -239,7 +234,6 @@ def outcome_exp(X_train, y_train, X_test, y_test, num_iterations=100, num_btrees
         single_tree_variances.append(single_tree_variance)
         single_tree_errors.append(single_tree_error)
 
-        # Bagged Trees
         bagged_tree = Bagged_tree(num_btrees)
         bagged_tree.fit(samp_X_train, samp_y_train)
         bagged_tree_preds = bagged_tree.predict(X_test)
@@ -250,7 +244,6 @@ def outcome_exp(X_train, y_train, X_test, y_test, num_iterations=100, num_btrees
         bagged_tree_variances.append(bagged_tree_variance)
         bagged_tree_errors.append(bagged_tree_error)
 
-        # Random Forest
         rf_model = RF_Classifier(num_rf_trees, max_feat)
         rf_model.fit(samp_X_train, samp_y_train)
         rf_preds = rf_model.predict(X_test)
@@ -276,7 +269,7 @@ def outcome_exp(X_train, y_train, X_test, y_test, num_iterations=100, num_btrees
             avg_bagged_tree_bias, avg_bagged_tree_variance, avg_bagged_tree_error,
             avg_rf_bias, avg_rf_variance, avg_rf_error)
 
-# Running the bias-variance experiment
+
 stree_bias, stree_variance, stree_error, btree_bias, btree_variance, btree_error, rf_bias, rf_variance, rf_error = outcome_exp(
     X_train, y_train, X_test, y_test
 )
