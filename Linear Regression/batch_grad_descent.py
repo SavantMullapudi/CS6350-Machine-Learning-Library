@@ -35,7 +35,7 @@ def run_grad_descent(X, y, init_wts, lr, threshold, max_iters):
     return wts, cost_history
 
 initial_wts = np.zeros(X_train_bias.shape[1]) 
-learning_rate = 0.01 
+learning_rate = 0.025
 tolerance = 1e-6 
 max_iterations = 100000  
 
