@@ -3,8 +3,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 
-train_data = pd.read_csv('DecisionTree/data/concrete/train.csv')
-test_data = pd.read_csv('DecisionTree/data/concrete/test.csv')
+train_data = pd.read_csv('data/concrete/train.csv')
+test_data = pd.read_csv('data/concrete/test.csv')
 
 X_train = train_data.drop(columns=train_data.columns[-1]).values  
 y_train = train_data.iloc[:, -1].values  
@@ -52,7 +52,6 @@ plt.title('Cost vs Iterations (SGD)', fontsize=14)
 plt.grid(False)  
 plt.show()
 
-# Evaluate the model on test data
 y_pred_test_sgd = np.dot(X_test_bias, optimal_wts_sgd)  
 mse_test_sgd = (1/(2*len(y_test))) * np.sum((y_pred_test_sgd - y_test)**2)
 
