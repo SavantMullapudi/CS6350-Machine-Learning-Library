@@ -236,7 +236,6 @@ plt.plot(range_tree, train_errors_bagging, label='Train Error', color='red', lin
 plt.plot(range_tree, test_errors_bagging, label='Test Error', color='black', linestyle='--')
 plt.xlabel('Number of Trees', fontsize=12)
 plt.ylabel('Error', fontsize=12)
-plt.xticks([0, 10, 20, 30, 40, 50], [0, 100, 200, 300, 400, 500])
 plt.title('Bagging Tree - Training and Test Errors vs. Number of Trees', fontsize=14)
 plt.legend(loc='best')
 plt.ylim(0.000, 0.0225)  
