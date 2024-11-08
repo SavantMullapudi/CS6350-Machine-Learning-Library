@@ -1,4 +1,4 @@
-###Ensemble Learning
+##Ensemble Learning
 
 Adaboost Algorithm: python3 adaboost_algo.py
 
