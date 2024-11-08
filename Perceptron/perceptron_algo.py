@@ -4,8 +4,8 @@ import numpy as np
 
 column_names = ['variance', 'skewness', 'curtosis', 'entropy', 'label']
 
-train_data = pd.read_csv('ML HW 3/bank-note/train.csv', header=None, names=column_names)
-test_data = pd.read_csv('ML HW 3/bank-note/test.csv', header=None, names=column_names)
+train_data = pd.read_csv('bank-note/train.csv', header=None, names=column_names)
+test_data = pd.read_csv('bank-note/test.csv', header=None, names=column_names)
 
 X_train = train_data[['variance', 'skewness', 'curtosis', 'entropy']].values  
 y_train = train_data['label'].values               
