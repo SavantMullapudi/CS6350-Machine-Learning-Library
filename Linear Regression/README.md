@@ -1,4 +1,4 @@
-##Linear Regression
+## Linear Regression
 
 Batch Gradient Descent: python3 batch_grad_descent.py
 
