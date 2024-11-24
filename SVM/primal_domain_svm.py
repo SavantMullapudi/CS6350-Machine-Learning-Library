@@ -21,7 +21,7 @@ def svm_primal(X, y, C, gamma_rate, a, max_epochs):
 
     n, d = X.shape  
     w = np.zeros(d)  
-    b = 0.1
+    b = 0
     updates = 0  
 
     for epoch in range(max_epochs):
