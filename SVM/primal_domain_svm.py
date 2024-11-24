@@ -53,4 +53,5 @@ for i in C_range:
     print(f"Hyperparameter C: {i}")
     print(f"Training Error: {train_error:.4f}")
     print(f"Test Error: {test_error:.4f}")
+    print('------')
     
