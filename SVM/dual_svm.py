@@ -99,4 +99,4 @@ for C in C_range:
     print(f"Bias Difference: {bias_difference:.4f}")
     print(f"Training Error Difference: {train_error_difference:.4f}")
     print(f"Test Error Difference: {test_error_difference:.4f}")
-    print("="*30)
+    print("---------------------------------------")
