@@ -1,22 +1,22 @@
 #!/bin/sh
 
-echo "Result of 2a"
+echo "Result of primal_domain_svm"
 python primal_domain_svm.py
 
-echo "Result of 2b"
+echo "Result of primal_domain_svm2"
 python primal_domain_svm2.py
 
-echo "Result of 2c"
+echo "Result of primal_svm_diff"
 python primal_svm_diff.py
 
-echo "Result of 3a"
+echo "Result of dual_svm"
 python dual_svm.py
 
-echo "Result of 3b"
+echo "Result of dual_kernel_svm"
 python dual_kernel_svm.py
 
-echo "Result of 3c"
+echo "Result of support_vector_svm"
 python support_vector_svm.py
 
-echo "Result of 3d"
+echo "Result of perceptron_kernel_svm"
 python perceptron_kernel_svm.py
