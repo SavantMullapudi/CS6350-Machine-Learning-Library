@@ -6,8 +6,8 @@ from sklearn.model_selection import train_test_split
 import pandas as pd
 import numpy as np
 
-train_data = pd.read_csv("/Users/u1471518/Documents/My Files/Assignments/Machine Learning/ml-2024-f/train_final.csv")
-test_data = pd.read_csv("/Users/u1471518/Documents/My Files/Assignments/Machine Learning/ml-2024-f/test_final.csv")
+train_data = pd.read_csv("dataset/ml-2024-f/train_final.csv")
+test_data = pd.read_csv("dataset/ml-2024-f/test_final.csv")
 
 con_features = ['age', 'fnlwgt', 'education.num', 'capital.gain', 'capital.loss', 'hours.per.week']
 cat_features = ['workclass', 'education', 'marital.status', 'occupation', 'relationship', 'race', 'sex', 'native.country']
