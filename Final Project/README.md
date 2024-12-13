@@ -1,4 +1,4 @@
-### Final Project
+# Final Project
 
 This implements different models for the problem of predicting income>50K.
 
