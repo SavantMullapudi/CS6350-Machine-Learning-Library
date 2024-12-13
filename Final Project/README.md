@@ -1,6 +1,6 @@
 # Final Project
 
-This implements different models for the problem of predicting income>50K.
+This implements different models for the problem of predicting income > 50K.
 
 ## ML techniques used
 To run the Decision Tree on income dataset: python3 ml_comp_decision_tree.py
